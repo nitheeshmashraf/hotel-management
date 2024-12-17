@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Dashboard from './pages/Dashboard'
 import RoomManagement from './pages/RoomManagement'
 import Bookings from './pages/Bookings'
+import Reports from './pages/Reports'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/rooms" element={<RoomManagement />} />
         <Route path="/bookings" element={<Bookings />} />
+        <Route path="/reports" element={<Reports />} />
       </Routes>
     </Router>
   )

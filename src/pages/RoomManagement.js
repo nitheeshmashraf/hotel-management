@@ -1,49 +1,177 @@
-// RoomManagement.js
 import React, { useState } from 'react'
 import {
-  Button,
+  Container,
   Table,
+  TableBody,
+  TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
+  Paper,
+  IconButton,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  Box,
 } from '@mui/material'
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
 
 const RoomManagement = () => {
   const [rooms, setRooms] = useState([
-    { id: 1, number: '101', type: 'Single', status: 'Available' },
-    { id: 2, number: '102', type: 'Double', status: 'Occupied' },
+    { id: 1, number: '101', type: 'Single', status: 'active' },
+    { id: 2, number: '102', type: 'Double', status: 'active' },
+    { id: 3, number: '103', type: 'Suite', status: 'active' },
   ])
 
+  const [openDialog, setOpenDialog] = useState(false)
+  const [selectedRoom, setSelectedRoom] = useState(null)
+  const [roomDetails, setRoomDetails] = useState({
+    number: '',
+    type: '',
+    status: '',
+  })
+
+  const handleEdit = (room) => {
+    setRoomDetails({ ...room })
+    setSelectedRoom(room)
+    setOpenDialog(true)
+  }
+
+  const handleDelete = (roomId) => {
+    setRooms(rooms.filter((room) => room.id !== roomId))
+  }
+
+  const handleInputChange = (e) => {
+    setRoomDetails({
+      ...roomDetails,
+      [e.target.name]: e.target.value,
+    })
+  }
+
+  const handleSave = () => {
+    if (selectedRoom) {
+      // Update existing room
+      setRooms(
+        rooms.map((room) =>
+          room.id === selectedRoom.id ? { ...room, ...roomDetails } : room
+        )
+      )
+    } else {
+      // Add new room
+      setRooms([
+        ...rooms,
+        {
+          id: rooms.length + 1,
+          ...roomDetails,
+        },
+      ])
+    }
+    setOpenDialog(false)
+  }
+
+  const handleDialogClose = () => {
+    setOpenDialog(false)
+  }
+
   return (
-    <div>
+    <Container>
       <h2>Room Management</h2>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Room Number</TableCell>
-            <TableCell>Type</TableCell>
-            <TableCell>Status</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rooms.map((room) => (
-            <TableRow key={room.id}>
-              <TableCell>{room.number}</TableCell>
-              <TableCell>{room.type}</TableCell>
-              <TableCell>{room.status}</TableCell>
+
+      {/* Updated Add New Room button with Box for layout */}
+      <Box display="flex" justifyContent="flex-end" mb={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setOpenDialog(true)}
+        >
+          New
+        </Button>
+      </Box>
+
+      {/* Room table */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell align="center">
+                <strong>Room Number</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Room Type</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Status</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Actions</strong>
+              </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => alert('Add Room')}
-      >
-        Add Room
-      </Button>
-    </div>
+          </TableHead>
+          <TableBody>
+            {rooms.map((room) => (
+              <TableRow key={room.id}>
+                <TableCell align="center">{room.number}</TableCell>
+                <TableCell align="center">{room.type}</TableCell>
+                <TableCell align="center">{room.status}</TableCell>
+                <TableCell align="center">
+                  <IconButton color="primary" onClick={() => handleEdit(room)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleDelete(room.id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Room Dialog */}
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>{selectedRoom ? 'Edit Room' : 'Add Room'}</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Room Number"
+            fullWidth
+            margin="normal"
+            name="number"
+            value={roomDetails.number}
+            onChange={handleInputChange}
+          />
+          <TextField
+            label="Room Type"
+            fullWidth
+            margin="normal"
+            name="type"
+            value={roomDetails.type}
+            onChange={handleInputChange}
+          />
+          <TextField
+            label="Status"
+            fullWidth
+            margin="normal"
+            name="status"
+            value={roomDetails.status}
+            onChange={handleInputChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   )
 }
 

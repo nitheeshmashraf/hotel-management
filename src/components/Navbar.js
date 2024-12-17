@@ -9,7 +9,7 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material'
-// import MenuIcon from '@mui/icons-material/Menu'
+import MenuIcon from '@mui/icons-material/Menu'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 
@@ -35,9 +35,8 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <div
           className="desktop-menu"
-          style={{
-            display: 'none',
-            '@media (min-width:600px)': { display: 'flex' },
+          sx={{
+            display: { xs: 'none', sm: 'flex' },
           }}
         >
           <Button color="inherit" component={Link} to="/">
@@ -62,7 +61,9 @@ const Navbar = () => {
             aria-label="menu"
             sx={{ display: { xs: 'flex', sm: 'none' } }}
             onClick={handleMenuOpen}
-          ></IconButton>
+          >
+            <MenuIcon />
+          </IconButton>
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
