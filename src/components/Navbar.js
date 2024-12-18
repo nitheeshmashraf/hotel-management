@@ -8,6 +8,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Box,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Link } from 'react-router-dom'
@@ -35,11 +36,9 @@ const Navbar = () => {
         </Typography>
 
         {/* Desktop Navigation */}
-        <div
+        <Box
           className="desktop-menu"
-          sx={{
-            display: { xs: 'none', sm: 'flex' },
-          }}
+          sx={{ display: { xs: 'none', sm: 'flex' } }}
         >
           <Button color="inherit" component={Link} to="/">
             Dashboard
@@ -53,7 +52,7 @@ const Navbar = () => {
           <Button color="inherit" component={Link} to="/reports">
             Reports
           </Button>
-        </div>
+        </Box>
 
         {/* Mobile Navigation */}
         <div className="mobile-menu">
