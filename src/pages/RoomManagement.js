@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Container,
   Table,
@@ -18,13 +18,10 @@ import {
   Box,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
+import { getRooms } from '../services/api'
 
 const RoomManagement = () => {
-  const [rooms, setRooms] = useState([
-    { id: 1, number: '101', type: 'Single', status: 'active' },
-    { id: 2, number: '102', type: 'Double', status: 'active' },
-    { id: 3, number: '103', type: 'Suite', status: 'active' },
-  ])
+  const [rooms, setRooms] = useState([])
 
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedRoom, setSelectedRoom] = useState(null)
@@ -75,6 +72,14 @@ const RoomManagement = () => {
   const handleDialogClose = () => {
     setOpenDialog(false)
   }
+  // Fetch rooms data when component mounts
+  useEffect(() => {
+    const fetchRooms = async () => {
+      const rooms = await getRooms()
+      setRooms(rooms)
+    }
+    fetchRooms()
+  }, []) // Empty dependency array ensures this runs only once on mount
 
   return (
     <Container>
@@ -87,7 +92,7 @@ const RoomManagement = () => {
           color="primary"
           onClick={() => setOpenDialog(true)}
         >
-          New
+          Add new room
         </Button>
       </Box>
 

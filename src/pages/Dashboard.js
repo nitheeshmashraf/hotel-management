@@ -1,5 +1,5 @@
 // Dashboard.js
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Card,
@@ -22,55 +22,14 @@ import {
   IconButton,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
+import { getMetrics, getReservations } from '../services/api'
 
 const Dashboard = () => {
   // Sample data for summary metrics
-  const metrics = [
-    { title: 'Total Rooms', value: 120, color: '#4CAF50' },
-    { title: 'Occupied Rooms', value: 80, color: '#FF9800' },
-    { title: 'Pending Bookings', value: 15, color: '#2196F3' },
-    { title: 'Revenue Today', value: '$4,500', color: '#9C27B0' },
-  ]
+  const [metrics, setMetrics] = useState([])
 
   // Sample data for upcoming reservations
-  const [upcomingReservations, setUpcomingReservations] = useState([
-    {
-      id: 1,
-      guestName: 'John Doe',
-      contactNumber: '+97155234234',
-      checkIn: '2024-09-20',
-      checkOut: '2024-09-25',
-      room: '101',
-      occupants: 2,
-    },
-    {
-      id: 2,
-      guestName: 'Jane Smith',
-      contactNumber: '+97155234234',
-      checkIn: '2024-09-21',
-      checkOut: '2024-09-26',
-      room: '102',
-      occupants: 2,
-    },
-    {
-      id: 3,
-      guestName: 'Robert Brown',
-      contactNumber: '+97155234234',
-      checkIn: '2024-09-22',
-      checkOut: '2024-09-27',
-      room: '201',
-      occupants: 2,
-    },
-    {
-      id: 4,
-      guestName: 'Emily Davis',
-      contactNumber: '+97155234234',
-      checkIn: '2024-09-23',
-      checkOut: '2024-09-28',
-      room: '202',
-      occupants: 2,
-    },
-  ])
+  const [upcomingReservations, setUpcomingReservations] = useState([])
 
   // Dialog state for editing
   const [open, setOpen] = useState(false)
@@ -114,6 +73,19 @@ const Dashboard = () => {
       prev.filter((reservation) => reservation.id !== id)
     )
   }
+  // Fetch reservations data when component mounts
+  useEffect(() => {
+    const fetchReservations = async () => {
+      const reservations = await getReservations()
+      setUpcomingReservations(reservations)
+    }
+    fetchReservations()
+    const fetchMetrics = async () => {
+      const metrices = await getMetrics()
+      setMetrics(metrices)
+    }
+    fetchMetrics()
+  }, []) // Empty dependency array ensures this runs only once on mount
 
   return (
     <Container>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Container,
   Table,
@@ -18,37 +18,9 @@ import {
   Box,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
-
+import { getBookings } from '../services/api'
 const Bookings = () => {
-  const [bookings, setBookings] = useState([
-    {
-      id: 1,
-      guestName: 'John Doe',
-      room: '101',
-      checkIn: '2024-12-20',
-      checkOut: '2024-12-25',
-      bookingDate: '2024-12-10',
-      status: 'Confirmed',
-    },
-    {
-      id: 2,
-      guestName: 'Jane Smith',
-      room: '102',
-      checkIn: '2024-12-22',
-      checkOut: '2024-12-28',
-      bookingDate: '2024-12-15',
-      status: 'Pending',
-    },
-    {
-      id: 3,
-      guestName: 'Mark Lee',
-      room: '103',
-      checkIn: '2024-12-24',
-      checkOut: '2024-12-30',
-      bookingDate: '2024-12-18',
-      status: 'Confirmed',
-    },
-  ])
+  const [bookings, setBookings] = useState([])
 
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState(null)
@@ -104,6 +76,14 @@ const Bookings = () => {
   const handleDialogClose = () => {
     setOpenDialog(false)
   }
+  // Fetch bookings data when component mounts
+  useEffect(() => {
+    const fetchBookings = async () => {
+      const bookings = await getBookings()
+      setBookings(bookings)
+    }
+    fetchBookings()
+  }, []) // Empty dependency array ensures this runs only once on mount
 
   return (
     <Container>

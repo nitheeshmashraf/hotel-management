@@ -29,7 +29,9 @@ const Navbar = () => {
       <Toolbar>
         {/* Logo or App Name */}
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Hotel Management
+          <Button color="inherit" component={Link} to="/">
+            Hotel Management
+          </Button>
         </Typography>
 
         {/* Desktop Navigation */}
