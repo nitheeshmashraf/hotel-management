@@ -135,10 +135,30 @@ export const getReports = async () => {
 
 export const getMetrics = async () => {
   const response = [
-    { title: 'Total Rooms', value: 120, color: '#4CAF50' },
-    { title: 'Occupied Rooms', value: 80, color: '#FF9800' },
-    { title: 'Pending Bookings', value: 15, color: '#2196F3' },
-    { title: 'Revenue Today', value: '$4,500', color: '#9C27B0' },
+    {
+      title: 'Total Rooms',
+      value: 120,
+      color: '#4CAF50',
+      navigation: '/rooms',
+    },
+    {
+      title: 'Occupied Rooms',
+      value: 80,
+      color: '#FF9800',
+      navigation: '/occupied',
+    },
+    {
+      title: 'Pending Bookings',
+      value: 15,
+      color: '#2196F3',
+      navigation: '/bookings',
+    },
+    {
+      title: 'Revenue Today',
+      value: '$4,500',
+      color: '#9C27B0',
+      navigation: '/reports',
+    },
   ]
   return response
 }

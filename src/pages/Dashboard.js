@@ -23,6 +23,7 @@ import {
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { getMetrics, getReservations } from '../services/api'
+import { Link } from 'react-router-dom'
 
 const Dashboard = () => {
   // Sample data for summary metrics
@@ -104,7 +105,13 @@ const Dashboard = () => {
           {metrics.map((metric, index) => (
             <Card
               key={index}
-              sx={{ backgroundColor: metric.color, color: '#fff' }}
+              sx={{
+                backgroundColor: metric.color,
+                color: '#fff',
+                textDecoration: 'none',
+              }}
+              component={Link}
+              to={metric.navigation}
             >
               <CardContent>
                 <Typography align="center" variant="h6">
