@@ -17,11 +17,21 @@ import {
   Button,
   Box,
 } from '@mui/material'
+
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { getBookings } from '../services/api'
 const Bookings = () => {
   const [bookings, setBookings] = useState([])
-
+  const [filter, setFilter] = useState('Confirmed') // Initial filter state
+  const [toDate, setToDate] = useState(() => {
+    const today = new Date()
+    return today.toISOString().split('T')[0] // Format to YYYY-MM-DD
+  })
+  const handleToggle = (event) => {
+    setFilter(event.target.value == 'Pending' ? 'Pending' : 'Confirmed')
+  }
   const [openDialog, setOpenDialog] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [bookingDetails, setBookingDetails] = useState({
@@ -88,7 +98,19 @@ const Bookings = () => {
   return (
     <Container>
       <h2>Bookings Management</h2>
-
+      <Box display="flex" justifyContent="flex-end" mb={2}>
+        {/* Toggle Switch */}
+        <ToggleButtonGroup
+          color="primary"
+          value={filter}
+          exclusive
+          onChange={handleToggle}
+          aria-label="Platform"
+        >
+          <ToggleButton value="Pending">Pending</ToggleButton>
+          <ToggleButton value="Confirmed">Confirmed</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
       {/* Add New Booking Button */}
       <Box display="flex" justifyContent="flex-end" mb={2}>
         <Button
@@ -129,30 +151,35 @@ const Bookings = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {bookings.map((booking) => (
-              <TableRow key={booking.id}>
-                <TableCell align="center">{booking.guestName}</TableCell>
-                <TableCell align="center">{booking.room}</TableCell>
-                <TableCell align="center">{booking.bookingDate}</TableCell>
-                <TableCell align="center">{booking.checkIn}</TableCell>
-                <TableCell align="center">{booking.checkOut}</TableCell>
-                <TableCell align="center">{booking.status}</TableCell>
-                <TableCell align="center">
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleEdit(booking)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    color="secondary"
-                    onClick={() => handleDelete(booking.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {bookings
+              .filter(
+                (booking) =>
+                  booking.status === filter && booking.checkIn >= toDate
+              )
+              .map((booking) => (
+                <TableRow key={booking.id}>
+                  <TableCell align="center">{booking.guestName}</TableCell>
+                  <TableCell align="center">{booking.room}</TableCell>
+                  <TableCell align="center">{booking.bookingDate}</TableCell>
+                  <TableCell align="center">{booking.checkIn}</TableCell>
+                  <TableCell align="center">{booking.checkOut}</TableCell>
+                  <TableCell align="center">{booking.status}</TableCell>
+                  <TableCell align="center">
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleEdit(booking)}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      color="secondary"
+                      onClick={() => handleDelete(booking.id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>

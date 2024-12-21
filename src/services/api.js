@@ -16,7 +16,7 @@ export const getReservations = async () => {
       id: 1,
       guestName: 'John Doe',
       contactNumber: '+97155234234',
-      checkIn: '2024-09-20',
+      checkIn: '2024-12-20',
       checkOut: '2024-09-25',
       room: '101',
       occupants: 2,
@@ -25,7 +25,7 @@ export const getReservations = async () => {
       id: 2,
       guestName: 'Jane Smith',
       contactNumber: '+97155234234',
-      checkIn: '2024-09-21',
+      checkIn: '2024-12-21',
       checkOut: '2024-09-26',
       room: '102',
       occupants: 2,
@@ -132,28 +132,64 @@ export const getReports = async () => {
   ]
   return response
 }
-
+export const getOccupiedRooms = async () => {
+  const response = [
+    {
+      id: 1,
+      room: '101',
+      guestName: 'John Doe',
+      checkIn: '2024-09-20',
+      total: 200,
+      paymentModes: [],
+      contactNumber: +97155464646,
+      checkOut: '2024-09-21',
+      occupants: 2,
+      totalPaid: 0,
+      balancetoPay: 200,
+      is_checkedOut: false,
+    },
+    {
+      id: 2,
+      room: '102',
+      guestName: 'Jane Smith',
+      checkIn: '2024-09-21',
+      total: 100,
+      paymentModes: [],
+      contactNumber: +97155464646,
+      checkOut: '2024-12-21',
+      occupants: 1,
+      totalPaid: 0,
+      balancetoPay: 100,
+      is_checkedOut: true,
+    },
+  ]
+  return response
+}
 export const getMetrics = async () => {
   const response = [
     {
+      id: 'Total_Rooms',
       title: 'Total Rooms',
       value: 120,
       color: '#4CAF50',
       navigation: '/rooms',
     },
     {
+      id: 'Occupied_Rooms',
       title: 'Occupied Rooms',
       value: 80,
       color: '#FF9800',
       navigation: '/occupied',
     },
     {
-      title: 'Pending Bookings',
+      id: 'Bookings',
+      title: 'Bookings',
       value: 15,
       color: '#2196F3',
       navigation: '/bookings',
     },
     {
+      id: 'Revenue_Today',
       title: 'Revenue Today',
       value: '$4,500',
       color: '#9C27B0',

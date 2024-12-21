@@ -22,13 +22,23 @@ import {
   IconButton,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
-import { getMetrics, getReservations } from '../services/api'
+import {
+  getBookings,
+  getMetrics,
+  getOccupiedRooms,
+  getReservations,
+  getRooms,
+} from '../services/api'
 import { Link } from 'react-router-dom'
 
 const Dashboard = () => {
   // Sample data for summary metrics
   const [metrics, setMetrics] = useState([])
-
+  const [hasMetricsInitialized, setHasMetricsInitialized] = useState(false)
+  const [toDate, setToDate] = useState(() => {
+    const today = new Date()
+    return today.toISOString().split('T')[0] // Format to YYYY-MM-DD
+  })
   // Sample data for upcoming reservations
   const [upcomingReservations, setUpcomingReservations] = useState([])
 
@@ -82,12 +92,69 @@ const Dashboard = () => {
     }
     fetchReservations()
     const fetchMetrics = async () => {
-      const metrices = await getMetrics()
-      setMetrics(metrices)
+      const initialMetrics = await getMetrics() // Replace with your metrics fetch logic
+      setMetrics(initialMetrics)
     }
+
     fetchMetrics()
   }, []) // Empty dependency array ensures this runs only once on mount
+  useEffect(() => {
+    if (metrics.length > 0 && !hasMetricsInitialized) {
+      // Define all fetching functions
+      const fetchMetricsData = async () => {
+        try {
+          const [rooms, occupiedRooms, bookings, revenue] = await Promise.all([
+            getRooms(),
+            getOccupiedRooms(),
+            getBookings(),
+            // getRevenue(), // Replace with the correct function for revenue
+          ])
+          // Filter for checked-out rooms and calculate total revenue
+          const checkedOut = occupiedRooms.filter(
+            (room) => room.is_checkedOut === true && room.checkOut === toDate
+          )
+          const revenueTotal = checkedOut.reduce(
+            (sum, room) => sum + (room.total || 0),
+            0
+          )
+          console.log(revenueTotal)
 
+          const updatedMetrics = metrics.map((metric) => {
+            switch (metric.id) {
+              case 'Total_Rooms':
+                return { ...metric, value: rooms.length }
+              case 'Occupied_Rooms':
+                return { ...metric, value: occupiedRooms.length }
+              case 'Bookings':
+                return { ...metric, value: bookings.length }
+              case 'Revenue_Today': // Example metric ID for revenue
+                return { ...metric, value: revenueTotal } // Adjust as per revenue data
+              default:
+                return metric
+            }
+          })
+
+          setMetrics(updatedMetrics)
+          setHasMetricsInitialized(true) // Set flag after successful data fetch
+        } catch (error) {
+          console.error('Error fetching metrics data:', error)
+        }
+      }
+
+      fetchMetricsData()
+    }
+  }, [metrics, hasMetricsInitialized])
+  // const fetchReportData = () => {
+  //   const filteredData = rawReportData.filter((data) => {
+  //     const bookingDate = new Date(data.bookingDate)
+  //     const from = fromDate ? new Date(fromDate) : null
+  //     const to = toDate ? new Date(toDate) : null
+  //     return (!from || bookingDate >= from) && (!to || bookingDate <= to)
+  //   })
+
+  //   // Handle daily or other report types (if needed)
+  //   setReportData(filteredData)
+  // }
   return (
     <Container>
       <Box my={4}>
@@ -118,7 +185,10 @@ const Dashboard = () => {
                   {metric.title}
                 </Typography>
                 <Typography align="center" variant="h4" fontWeight="bold">
-                  {metric.value}
+                  {metric.id === 'Revenue_Today' && '₹'}
+                  {metric.id === 'Revenue_Today'
+                    ? parseFloat(metric.value).toFixed(2)
+                    : metric.value}
                 </Typography>
               </CardContent>
             </Card>
@@ -158,36 +228,42 @@ const Dashboard = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {upcomingReservations.map((reservation) => (
-                  <TableRow key={reservation.id}>
-                    <TableCell align="center">
-                      {reservation.guestName}
-                    </TableCell>
-                    <TableCell align="center">
-                      {reservation.contactNumber}
-                    </TableCell>
-                    <TableCell align="center">{reservation.checkIn}</TableCell>
-                    <TableCell align="center">{reservation.checkOut}</TableCell>
-                    <TableCell align="center">{reservation.room}</TableCell>
-                    <TableCell align="center">
-                      {reservation.occupants}
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleClickOpen(reservation)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        color="secondary"
-                        onClick={() => handleDelete(reservation.id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {upcomingReservations
+                  .filter((reservation) => reservation.checkIn >= toDate)
+                  .map((reservation) => (
+                    <TableRow key={reservation.id}>
+                      <TableCell align="center">
+                        {reservation.guestName}
+                      </TableCell>
+                      <TableCell align="center">
+                        {reservation.contactNumber}
+                      </TableCell>
+                      <TableCell align="center">
+                        {reservation.checkIn}
+                      </TableCell>
+                      <TableCell align="center">
+                        {reservation.checkOut}
+                      </TableCell>
+                      <TableCell align="center">{reservation.room}</TableCell>
+                      <TableCell align="center">
+                        {reservation.occupants}
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleClickOpen(reservation)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color="secondary"
+                          onClick={() => handleDelete(reservation.id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>

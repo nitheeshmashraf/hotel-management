@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Divider,
@@ -24,38 +24,11 @@ import {
   IconButton,
 } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
-
-const sampleData = [
-  {
-    id: 1,
-    room: '101',
-    guestName: 'John Doe',
-    checkIn: '2024-09-20',
-    total: 200,
-    paymentModes: [],
-    contactNumber: +97155464646,
-    checkOut: '2024-09-21',
-    occupants: 2,
-    totalPaid: 0,
-    balancetoPay: 200,
-  },
-  {
-    id: 2,
-    room: '102',
-    guestName: 'Jane Smith',
-    checkIn: '2024-09-21',
-    total: 100,
-    paymentModes: [],
-    contactNumber: +97155464646,
-    checkOut: '2024-09-22',
-    occupants: 1,
-    totalPaid: 0,
-    balancetoPay: 200,
-  },
-]
+import { getOccupiedRooms } from '../services/api'
 
 const OccupiedRoomsPage = () => {
-  const [rooms, setRooms] = useState(sampleData)
+  const [disableAdd, setDisableAdd] = useState(false)
+  const [rooms, setRooms] = useState([])
   const [selectedRoom, setSelectedRoom] = useState(null)
   const [newPayment, setNewPayment] = useState({ mode: 'Cash', amount: '' })
 
@@ -69,6 +42,8 @@ const OccupiedRoomsPage = () => {
   }
 
   const handleCheckout = () => {
+    selectedRoom.is_checkedOut = true
+    setRooms(...rooms, selectedRoom)
     setRooms(rooms.filter((room) => room.id !== selectedRoom.id))
     handleCloseDialog()
   }
@@ -83,65 +58,53 @@ const OccupiedRoomsPage = () => {
 
     if (newTotal > selectedRoom.total) {
       console.error("Total payments exceed the room's total amount!")
+      alert("Total payments exceed the room's total amount!")
       return // Prevent updating if the limit is exceeded
     }
-    selectedRoom.totalPaid = newTotal
-    selectedRoom.balancetoPay = selectedRoom.total - selectedRoom.totalPaid
+
+    const updatedPaymentModes = selectedRoom.paymentModes.some(
+      (mode) => mode.mode === newPayment.mode
+    )
+      ? selectedRoom.paymentModes.map((mode) =>
+          mode.mode === newPayment.mode
+            ? { ...mode, amount: mode.amount + parseFloat(newPayment.amount) }
+            : mode
+        )
+      : [
+          ...selectedRoom.paymentModes,
+          { ...newPayment, amount: parseFloat(newPayment.amount) },
+        ]
+
     const updatedRoom = {
       ...selectedRoom,
-      paymentModes: selectedRoom.paymentModes.some(
-        (mode) => mode.mode === newPayment.mode
-      )
-        ? selectedRoom.paymentModes.map((mode) =>
-            mode.mode === newPayment.mode
-              ? { ...mode, amount: mode.amount + parseFloat(newPayment.amount) }
-              : mode
-          )
-        : [
-            ...selectedRoom.paymentModes,
-            { ...newPayment, amount: parseFloat(newPayment.amount) },
-          ],
+      totalPaid: newTotal,
+      balancetoPay: selectedRoom.total - newTotal,
+      paymentModes: updatedPaymentModes,
     }
-
-    // const updatedRoom = {
-    //   ...selectedRoom,
-    //   paymentModes: [
-    //     ...selectedRoom.paymentModes,
-    //     selectedRoom.paymentModes.some((mode) => mode.mode === newPayment.mode)
-    //       ? selectedRoom.paymentModes.map((payment) =>
-    //           payment.mode === newPayment.mode
-    //             ? {
-    //                 ...payment,
-    //                 amount: payment.amount + newPayment.amount,
-    //               }
-    //             : payment
-    //         )
-    //       : { ...newPayment, amount: parseFloat(newPayment.amount) },
-    //   ],
-    // }
-    // const updatedRoom = {
-    //   ...selectedRoom,
-    //   paymentModes: selectedRoom.paymentModes.some(
-    //     (mode) => mode.type === newPayment.type
-    //   )
-    //     ? [
-    //         ...selectedRoom.paymentModes,
-    //         { ...newPayment, amount: parseFloat(newPayment.amount) },
-    //       ]
-    //     : selectedRoom.paymentModes.map((mode) =>
-    //         mode.type === newPayment.type
-    //           ? { ...mode, amount: mode.amount + parseFloat(newPayment.amount) }
-    //           : mode
-    //       ),
-    // }
 
     setRooms(
       rooms.map((room) => (room.id === selectedRoom.id ? updatedRoom : room))
     )
     setSelectedRoom(updatedRoom) // Update details in the dialog
+
+    // Disable add button if balance is paid
+    if (updatedRoom.balancetoPay === 0) {
+      setDisableAdd(true)
+    }
+
+    // Reset new payment form
     setNewPayment({ mode: 'Cash', amount: '' })
   }
-
+  useEffect(() => {
+    const fetchOccupiedRooms = async () => {
+      const rooms = await getOccupiedRooms()
+      setRooms(rooms.filter((room) => room.is_checkedOut === false))
+    }
+    fetchOccupiedRooms()
+  }, []) // Empty dependency array ensures this runs only once on mount
+  useEffect(() => {
+    console.log(rooms)
+  }, [rooms])
   return (
     <Container>
       <Box>
@@ -287,7 +250,7 @@ const OccupiedRoomsPage = () => {
                   fullWidth
                 />
                 <Button
-                  disabled={selectedRoom.balanceToPay === 0}
+                  disabled={disableAdd}
                   variant="contained"
                   onClick={handleAddPaymentMode}
                 >
