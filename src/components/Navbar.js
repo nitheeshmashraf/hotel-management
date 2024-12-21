@@ -52,6 +52,9 @@ const Navbar = () => {
           <Button color="inherit" component={Link} to="/reports">
             Reports
           </Button>
+          <Button color="inherit" component={Link} to="/occupied">
+            Occupied
+          </Button>
         </Box>
 
         {/* Mobile Navigation */}
